@@ -45,9 +45,16 @@ def _rate_limit_pq(pq_input, requests_per_minute=REQUESTS_PER_MINUTE):
         A queryable PyQuery object
 
     """
-    print('_rate_limit_pq: ', pq_input)
-    ret = pq(pq_input)
-    time.sleep(60/requests_per_minute)
+    try:
+        print('_rate_limit_pq: ', pq_input)
+        ret = pq(pq_input)
+        time.sleep(60/requests_per_minute)
+    except Exception as e:
+        print(f"Failed - {str(e)}")
+        res = requests.get(pq_input)
+        print(f"status code {res.status_code}, url: {pq_input}")
+        print(f"Check Headers for Retry-After: {res.headers}")
+        raise Exception()
     return ret
 
 
@@ -269,7 +276,7 @@ def _remove_html_comment_tags(html):
     string
         The passed HTML contents with all comment tags removed.
     """
-    return str(html).replace('<!--', '').replace('-->', '')
+    return str(html).replace('<!--', '').replace('-->', '').replace('/MEN', '')
 
 
 def _get_stats_table(html_page, div, footer=False):
@@ -301,6 +308,7 @@ def _get_stats_table(html_page, div, footer=False):
     try:
         stats_table = pq(_remove_html_comment_tags(stats_html))
     except (ParserError, XMLSyntaxError) as e:
+        print("Error - " + str(e))
         return None
     if footer:
         teams_list = stats_table('tfoot tr').items()

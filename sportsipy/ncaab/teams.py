@@ -1194,9 +1194,10 @@ class Teams:
             # Skip any teams that don't have a valid team page, which is likely
             # any school that doesn't compete in D-I, but is still in the stats
             # list.
-            if team_name.lower() not in self._conferences_dict:
+            if team_name.lower().replace('/men', '') not in self._conferences_dict:
+                print(team_name.lower() + " not in conferences_dict")
                 continue
-            conference = self._conferences_dict[team_name.lower()]
+            conference = self._conferences_dict[team_name.lower().replace('/men', '')]
             team = Team(team_data=team_data['data'],
                         team_conference=conference,
                         year=year)
